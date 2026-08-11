@@ -1,0 +1,26 @@
+{
+  "name": "veyl-ai",
+  "version": "0.1.0",
+  "description": "POC: Stellar-native multi-model AI inference gateway with shared pricing for MPP Session and MPP Charge",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "gateway": "tsx src/gateway/server.ts",
+    "demo": "tsx src/client/demo.ts",
+    "demo:agent": "tsx src/client/demoAgent.ts"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@stellar/mpp": "^0.7.1",
+    "@stellar/stellar-sdk": "^16.2.0",
+    "mppx": "^0.6.31",
+    "viem": "^2.55.11"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.11",
+    "typescript": "^7.0.2"
+  }
+}
