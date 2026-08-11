@@ -18,7 +18,7 @@ best practice), **Informational** (no action required now, worth tracking).
 
 **Location:** `src/gateway/server.ts`, `handleTick` (pre-fix).
 **Issue:** `amount` sent to `@stellar/mpp`'s channel is the *increment* added to the channel's running
-total for this call (confirmed empirically — see TECHNICAL_DESIGN.md §3.1's first failed run). The
+total for this call (confirmed empirically — see TECHNICAL_ARCHITECTURE.md §3.1's first failed run). The
 increment was computed as `totalAfter - totalBefore`, where `totalBefore` used
 `start = tickIndex * TICK_WORDS` **without clamping** to the conversation's actual length, while
 `totalAfter` used `end`, which *was* clamped (`Math.min(start + TICK_WORDS, allWords.length)`). A
@@ -53,7 +53,7 @@ stuck.
 next to, is single-process and keyed on conversation *content* rather than an explicit session id — a
 production deployment should use a client-supplied conversation id and a shared, atomic backing store
 (Redis/Postgres — same requirement `@stellar/mpp`'s own docs state for its `Store`). Flagged in
-TECHNICAL_DESIGN.md rather than silently left as a surprise.
+TECHNICAL_ARCHITECTURE.md rather than silently left as a surprise.
 
 ### [HIGH-2] Floating-point arithmetic in the payment-amount path — FIXED
 
@@ -93,7 +93,7 @@ required non-empty and capped at 4,000 characters, `tickIndex` required a non-ne
 Validation failures return a 400 with a short, safe message. Unexpected errors still get full detail
 in server-side `console.error` logs but only a generic `{"error":"internal error"}` body to the client.
 **Verified:** adversarial curl probes (bad model, bad reasoning effort, negative tickIndex, malformed
-JSON) all now return clean 4xx JSON with no internal detail — see TECHNICAL_DESIGN.md §3.1 for the
+JSON) all now return clean 4xx JSON with no internal detail — see TECHNICAL_ARCHITECTURE.md §3.1 for the
 transcript.
 
 ### [MEDIUM-2] Unbounded request body — FIXED
@@ -116,7 +116,7 @@ real integration requirement: in a production deployment, the model actually ser
 token usage must come from the **upstream provider's own response** (e.g. its `usage` field), never
 be re-trusted from client-supplied request parameters. Otherwise a client could request routing to an
 expensive model while claiming a cheap one for pricing purposes.
-**Action:** Documented explicitly in TECHNICAL_DESIGN.md's security considerations rather than left
+**Action:** Documented explicitly in TECHNICAL_ARCHITECTURE.md's security considerations rather than left
 implicit; flagged here so it isn't lost when the mock is swapped for a real provider.
 
 ### [LOW-2] `commitment_key` constructor argument accepts a Stellar `G...` address without erroring, but breaks the channel — DOCUMENTED
@@ -126,7 +126,7 @@ code.
 **Issue:** The `one-way-channel` contract's constructor takes `commitment_key` as a raw `BytesN<32>`.
 Passing a Stellar `G...` address string (StrKey-encoded) rather than the raw hex pubkey from
 `ed25519 pub` reproducibly traps the constructor (`Error(Context, InvalidAction)` /
-`UnreachableCodeReached`) — encountered firsthand during deployment (see TECHNICAL_DESIGN.md §3). This
+`UnreachableCodeReached`) — encountered firsthand during deployment (see TECHNICAL_ARCHITECTURE.md §3). This
 is an upstream ergonomics gap (silent-until-runtime-trap type confusion between two encodings of the
 same 32 bytes), not something fixable from this repo, but costly to rediscover blind.
 **Action:** Documented prominently in README.md's deployment section so it isn't rediscovered the
@@ -146,12 +146,12 @@ RECIPIENT_SECRET`) the first time both gateways ran in one process.
 any other import) by every entrypoint (`server.ts`, `chargeServer.ts`, `demo.ts`, `demoAgent.ts`)
 rather than relying on import-order side effects between sibling modules.
 **Verified:** clean startup and a full end-to-end run (session + charge) after the fix — see
-TECHNICAL_DESIGN.md §6.
+TECHNICAL_ARCHITECTURE.md §6.
 
 ### [LOW-4] `conversationId` was not scoped to the configured channel — FIXED FOR CURRENT BOUNDARY
 
 **Location:** `src/gateway/server.ts`, added with multi-turn/multi-model conversation support (see
-TECHNICAL_DESIGN.md §1, §3.3).
+TECHNICAL_ARCHITECTURE.md §1, §3.3).
 **Issue:** `conversations` is keyed purely by the client-supplied `conversationId` string, with no
 binding to a specific funder or channel. Two different funders coincidentally (or deliberately)
 choosing the same `conversationId` would have their turn/tick sequencing interfere — the second
@@ -185,7 +185,7 @@ side effect, also resolved the originally-logged `axios` vulnerabilities (`npm a
 post-upgrade) — `@stellar/stellar-sdk@16.x` drops the vulnerable `axios` dependency entirely.
 **Verified:** `getChannelState` succeeds against the live channel contract post-upgrade; a full
 multi-turn, multi-model conversation and a separate MPP Charge call both settled correctly on-chain
-afterward — see TECHNICAL_DESIGN.md §5–§6.
+afterward — see TECHNICAL_ARCHITECTURE.md §5–§6.
 **Residual risk:** running ahead of `@stellar/mpp`'s declared peer range means future `@stellar/mpp`
 patch releases are not guaranteed compatible with `@stellar/stellar-sdk@16.x`; re-verify on every
 `@stellar/mpp` upgrade until its peer range officially moves to `^16.x`.
@@ -220,7 +220,7 @@ design doc so the review itself is auditable.
 
 ### [DESIGN-1] MPP Charge (one-off agent access): payment-before-generation ordering — ADDRESSED AT SPEC STAGE
 
-**Location:** `TECHNICAL_DESIGN.md` §3.2 (specification), implemented in `src/gateway/chargeServer.ts`.
+**Location:** `TECHNICAL_ARCHITECTURE.md` §3.2 (specification), implemented in `src/gateway/chargeServer.ts`.
 **Question raised in review:** the Session gateway ([CRITICAL-1]'s home) generates a tick's tokens
 *before* pricing and gating them, which is safe there only because a tick is small and bounded
 (`TICK_WORDS`). A naive port of that same order to a single one-shot Charge call — generate a full
@@ -229,7 +229,7 @@ triggering a full, real inference call (against the operator's actual upstream p
 then simply never completing the resulting payment, since the compute would already have happened.
 **Resolution:** specified the Charge flow to price a caller-declared `maxOutputTokens` worst-case
 *before* any generation, gate generation behind that payment settling, then generate bounded to the
-cap — see TECHNICAL_DESIGN.md §3.2 for the full reasoning and the sequence diagram. This also matches
+cap — see TECHNICAL_ARCHITECTURE.md §3.2 for the full reasoning and the sequence diagram. This also matches
 HTTP-402/x402-style ordering: authorize first, then deliver. The review applied that payment-ordering
 principle to a new code path before it existed, instead of rediscovering it from a live bug.
 **Verification status: implemented and verified on-chain.** `src/gateway/chargeServer.ts` implements
@@ -255,7 +255,7 @@ transfer, not a mock.
 
 All findings that were reachable and fixable within this codebase were fixed and re-verified against a
 live testnet deployment (fresh channel contract, real on-chain close, exact settlement amount
-matching the pricing engine's output — see TECHNICAL_DESIGN.md §5–§6). One of those fixes (HIGH-3) was
+matching the pricing engine's output — see TECHNICAL_ARCHITECTURE.md §5–§6). One of those fixes (HIGH-3) was
 initially misjudged as low-priority when first logged, then found to be a full availability blocker
 once it was actually hit — left visible in the findings above rather than quietly corrected, because
 that misjudgment is worth remembering. Nothing in this table was fixed

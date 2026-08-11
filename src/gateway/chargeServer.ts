@@ -63,7 +63,7 @@ export function parseCompleteBody(raw: unknown): CompleteBody {
 
 /**
  * MPP Charge handler for one-off, bounded agent access — see
- * docs/TECHNICAL_DESIGN.md §3.2 and docs/SECURITY_AUDIT.md [DESIGN-1].
+ * docs/TECHNICAL_ARCHITECTURE.md §3.2 and docs/SECURITY_AUDIT.md [DESIGN-1].
  *
  * Payment is priced and verified against the worst case (maxOutputTokens)
  * BEFORE any generation happens — deliberately the reverse order from the

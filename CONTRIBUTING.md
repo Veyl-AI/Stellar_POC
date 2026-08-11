@@ -16,7 +16,7 @@ npm run typecheck
 - Keep payment-path arithmetic in exact integer units.
 - Do not commit `.env` files or funded Stellar secrets.
 - Prefer narrow changes with focused tests.
-- Update `docs/TECHNICAL_DESIGN.md` when architecture, payment ordering, or settlement assumptions change.
+- Update `docs/TECHNICAL_ARCHITECTURE.md` when architecture, payment ordering, or settlement assumptions change.
 - Update `docs/SECURITY_AUDIT.md` when a security-relevant finding is fixed, deferred, or newly discovered.
 
 ## Pull Requests

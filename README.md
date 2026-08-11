@@ -22,9 +22,23 @@ For agents, callers use a bounded request. The gateway prices `maxOutputTokens` 
 
 The POC settles in XLM on Stellar testnet to avoid test-asset faucet dependency. The production path is to settle in USDC, use a Stellar oracle such as Reflector for exchange rates, replace the mock model with Together AI usage data, and move in-memory state to Redis or Postgres.
 
+## Stellar Stack
+
+Veyl AI uses official Stellar payment primitives and SDKs around a small TypeScript gateway:
+
+- `@stellar/mpp` for MPP Session channel verification and MPP Charge settlement.
+- `mppx` for HTTP 402 challenge/credential handling.
+- `@stellar/stellar-sdk` for Stellar key handling and current Soroban XDR support.
+- SDF's `one-way-channel` Soroban contract for Session deposits, voucher verification, settlement, and refunds.
+- SEP-41 transfers for one-off Charge payments.
+- Stellar CLI for building, uploading, and deploying the testnet channel contract.
+- Native XLM SAC on testnet today; USDC is the intended production settlement asset.
+
+The repo does not include custom Soroban contract source. It integrates with the upstream one-way-channel contract and keeps the application-owned logic in request validation, model selection, pricing, and payment ordering.
+
 ## Documentation
 
-- [docs/TECHNICAL_DESIGN.md](docs/TECHNICAL_DESIGN.md): architecture, payment flows, pricing model, verification notes, and POC limitations.
+- [docs/TECHNICAL_ARCHITECTURE.md](docs/TECHNICAL_ARCHITECTURE.md): architecture, payment flows, Stellar stack, smart-contract path, pricing model, verification notes, and POC limitations.
 - [docs/SECURITY_AUDIT.md](docs/SECURITY_AUDIT.md): review findings and current known risks.
 - [docs/ROADMAP.md](docs/ROADMAP.md): suggested path from POC to production.
 
@@ -62,7 +76,7 @@ POST /v1/chat/complete  MPP Charge bounded completions
 
 ## Fresh Channel Setup
 
-The recorded testnet channels in the technical design are already closed. To run the Session demo again, deploy a new `one-way-channel` contract and update `.env`.
+The recorded testnet channels in the technical architecture are already closed. To run the Session demo again, deploy a new `one-way-channel` contract and update `.env`.
 
 ```bash
 cd /tmp

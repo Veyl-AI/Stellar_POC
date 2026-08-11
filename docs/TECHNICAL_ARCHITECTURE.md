@@ -1,4 +1,4 @@
-# Technical Design
+# Technical Architecture
 
 Status: POC, testnet only, reviewed for security and correctness.
 
@@ -151,6 +151,48 @@ Components:
 - `src/gateway/mockLlm.ts`: deterministic, history-aware stand-in for a hosted model API.
 - `src/client/demo.ts`: one conversation, three turns, three models, one funded channel.
 - `src/client/demoAgent.ts`: one bounded agent call paid through Charge.
+
+### Stellar Stack
+
+Veyl AI keeps the blockchain-facing surface deliberately small and relies on official Stellar tooling where possible:
+
+- **Stellar testnet:** the current execution network for deployed payment-channel contracts and SEP-41 transfers.
+- **Soroban:** smart-contract runtime used by the `one-way-channel` contract.
+- **SDF `one-way-channel` contract:** upstream channel contract used for Session deposits, off-chain voucher verification, final close, and unused-balance refund.
+- **`@stellar/mpp`:** official MPP SDK used by the gateway for channel verification and charge settlement.
+- **`mppx`:** HTTP 402 challenge/credential layer used by both client demos and gateway handlers.
+- **`@stellar/stellar-sdk`:** key handling and Soroban XDR support. The POC pins `16.2.0` because older `15.x` XDR definitions could not parse current testnet ledger responses during verification.
+- **SEP-41:** token-transfer path used by MPP Charge for bounded one-off agent calls.
+- **Stellar CLI:** build/upload/deploy tooling used to create fresh testnet channel contracts.
+- **Stellar Asset Contract:** the POC uses native XLM SAC on testnet. Production should use the selected USDC SAC and a real price source.
+
+### Smart Contract Path
+
+The repository does not define a custom Soroban contract. Instead, it deploys and integrates the SDF-maintained `stellar-experimental/one-way-channel` contract. That choice keeps the POC focused on the inference gateway, pricing engine, and payment ordering rather than new contract logic.
+
+The channel contract is used only by the MPP Session path:
+
+1. A funder opens a channel by depositing the settlement asset into the `one-way-channel` contract.
+2. The contract is configured with:
+   - `token`: native XLM SAC in the POC, USDC SAC in the intended production path.
+   - `from`: funder account.
+   - `to`: recipient/operator account.
+   - `commitment_key`: raw ed25519 public key used to verify off-chain vouchers.
+   - `amount`: initial channel deposit.
+   - `refund_waiting_period`: ledger delay before the funder can recover unused funds.
+3. For each Session tick, the client signs a cumulative payment commitment with the ed25519 commitment key.
+4. The gateway uses `@stellar/mpp/channel/server` to simulate contract verification of the commitment before releasing content.
+5. At close, the final signed amount is settled to the recipient and the unused channel balance is refunded to the funder.
+
+MPP Charge does not use the channel contract. It creates a one-off payment challenge, verifies the caller's credential, and submits a SEP-41 transfer for the quoted amount before generation.
+
+Important implementation notes:
+
+- `commitment_key` must be the raw hex public key from `ed25519 pub`, not a Stellar `G...` address.
+- The gateway currently reads one configured `CHANNEL_CONTRACT` from `.env`.
+- Conversation progress is scoped by `CHANNEL_CONTRACT:conversationId`.
+- `Store.memory()` is acceptable for this single-process POC, but production needs Redis, Postgres, or another shared atomic store.
+- The upstream channel contract path should be independently reviewed before material-value deployment.
 
 ## 6. Verification Record
 

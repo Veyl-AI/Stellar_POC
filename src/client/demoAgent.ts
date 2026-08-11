@@ -12,7 +12,7 @@ function requireEnv(name: string): string {
 const GATEWAY_URL = `http://localhost:${process.env.GATEWAY_PORT ?? 8787}/v1/chat/complete`;
 
 // Manual rawFetch + createCredential, not the polyfilled auto-retry fetch —
-// same reasoning as src/client/demo.ts (see docs/TECHNICAL_DESIGN.md §6.2): the
+// same reasoning as src/client/demo.ts (see docs/TECHNICAL_ARCHITECTURE.md §6.2): the
 // polyfilled path's own error-diagnostics code has a body-double-consumption
 // bug once real, non-trivial responses are involved. Sidestepping it here
 // too rather than relying on the charge flow happening not to trigger it.
@@ -77,7 +77,7 @@ async function main() {
   console.log("the human MPP Session gateway (src/client/demo.ts) draws from.");
   await agentCall("glm-5.2", "none", "Classify the sentiment of: 'Stellar fees are basically free.'", 40);
   console.log("\nAgent demo complete. One on-chain SEP-41 transfer, verified and settled before any content");
-  console.log("was generated — see docs/TECHNICAL_DESIGN.md §3.2 for why that ordering is the whole point.");
+  console.log("was generated — see docs/TECHNICAL_ARCHITECTURE.md §3.2 for why that ordering is the whole point.");
 }
 
 main().catch((err) => {

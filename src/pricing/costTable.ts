@@ -10,7 +10,7 @@
  * engine, one settlement layer, multiple upstream models.
  *
  * Source: Together AI published per-model rates, Aug-2026 (the intended real
- * upstream — see docs/TECHNICAL_DESIGN.md §1). These are open-weight models, not
+ * upstream — see docs/TECHNICAL_ARCHITECTURE.md §1). These are open-weight models, not
  * frontier-proprietary ones: the economic argument for pay-per-request on
  * Stellar only holds if the underlying compute is cheap enough that a
  * $0.00001 network fee doesn't dominate, and it's real providers like these

@@ -35,7 +35,7 @@ export interface ChatRequest {
  * own history only degrades the *content* it receives (the mock loses
  * context), never the payment integrity: input tokens are priced from
  * whatever history the paying client actually sent, so under-reporting
- * hurts nobody but the party doing it. See docs/TECHNICAL_DESIGN.md §3.3.
+ * hurts nobody but the party doing it. See docs/TECHNICAL_ARCHITECTURE.md §3.3.
  */
 export function buildResponseWords(req: ChatRequest): string[] {
   const priorAssistantTurns = req.history.filter((t) => t.role === "assistant");
@@ -55,7 +55,7 @@ export function buildResponseWords(req: ChatRequest): string[] {
 
 /**
  * Bounded variant for the MPP Charge (one-off) flow — see
- * docs/TECHNICAL_DESIGN.md §3.2. The Charge gateway must be able to guarantee it
+ * docs/TECHNICAL_ARCHITECTURE.md §3.2. The Charge gateway must be able to guarantee it
  * never generates past the `maxOutputTokens` cap it already charged the
  * caller for, so the cap is enforced here, at generation, not left as an
  * assumption the caller of this function has to remember to apply.
