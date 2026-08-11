@@ -2,7 +2,7 @@
 
 Status: POC, testnet only, reviewed for security and correctness.
 
-See also: [SECURITY_AUDIT.md](SECURITY_AUDIT.md) and [docs/ROADMAP.md](docs/ROADMAP.md).
+See also: [SECURITY_AUDIT.md](SECURITY_AUDIT.md) and [ROADMAP.md](ROADMAP.md).
 
 ## 1. Product Shape
 

@@ -54,7 +54,7 @@ interface TickBody {
    * pattern real stateless chat-completion APIs use. This is what lets a
    * conversation switch models between turns while keeping context: the
    * server holds no transcript of its own, so there's nothing tying history
-   * to a single model. See TECHNICAL_DESIGN.md §1 and §3.3.
+   * to a single model. See docs/TECHNICAL_DESIGN.md §1 and §3.3.
    */
   history: ChatTurn[];
 }
@@ -121,7 +121,7 @@ function parseTickBody(raw: unknown): TickBody {
  * re-charged — generalizes the single-turn version of this check to a
  * conversation that can span many turns, each possibly on a different
  * model. Single-process, in-memory, same caveat as the mppx Store above
- * (see TECHNICAL_DESIGN.md and SECURITY_AUDIT.md HIGH-1).
+ * (see docs/TECHNICAL_DESIGN.md and docs/SECURITY_AUDIT.md HIGH-1).
  */
 interface ConversationState {
   turnIndex: number;

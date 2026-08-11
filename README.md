@@ -12,7 +12,7 @@ Veyl AI is a Stellar-native inference service that gives users direct access to 
 - Shared model inventory and exact-integer pricing engine.
 - Multi-turn demo that switches models while carrying context forward.
 - Agent demo that pays before generation for a capped request.
-- Security and correctness review with findings recorded in [SECURITY_AUDIT.md](SECURITY_AUDIT.md).
+- Security and correctness review with findings recorded in [docs/SECURITY_AUDIT.md](docs/SECURITY_AUDIT.md).
 
 ## How It Works
 
@@ -24,8 +24,8 @@ The POC settles in XLM on Stellar testnet to avoid test-asset faucet dependency.
 
 ## Documentation
 
-- [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md): architecture, payment flows, pricing model, verification notes, and POC limitations.
-- [SECURITY_AUDIT.md](SECURITY_AUDIT.md): review findings and current known risks.
+- [docs/TECHNICAL_DESIGN.md](docs/TECHNICAL_DESIGN.md): architecture, payment flows, pricing model, verification notes, and POC limitations.
+- [docs/SECURITY_AUDIT.md](docs/SECURITY_AUDIT.md): review findings and current known risks.
 - [docs/ROADMAP.md](docs/ROADMAP.md): suggested path from POC to production.
 
 ## Requirements
