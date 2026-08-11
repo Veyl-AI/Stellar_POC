@@ -121,11 +121,25 @@ For Session, output tokens are metered per tick. For Charge, output tokens are t
 
 ```mermaid
 flowchart LR
-  Client[Client] --> Gateway[Inference Gateway]
-  Gateway --> Pricing[Pricing Engine]
-  Gateway --> Mock[Mock LLM]
-  Gateway --> MPP[@stellar/mpp]
-  MPP --> Stellar[Stellar Testnet]
+  Human["Human chat client"] -->|"/v1/chat/tick"| Gateway["Veyl gateway"]
+  Agent["Agent client"] -->|"/v1/chat/complete"| Gateway
+
+  subgraph GatewayProcess["Gateway process"]
+    Gateway --> Session["MPP Session handler"]
+    Gateway --> Charge["MPP Charge handler"]
+    Session --> Pricing["Pricing engine"]
+    Charge --> Pricing
+    Pricing --> Costs["Model cost table"]
+    Session --> Model["Mock model adapter"]
+    Charge --> Model
+  end
+
+  Session --> MppChannel["@stellar/mpp channel"]
+  Charge --> MppCharge["@stellar/mpp charge"]
+  MppChannel --> Channel["one-way-channel contract"]
+  MppCharge --> Transfer["SEP-41 transfer"]
+  Channel --> Stellar["Stellar testnet"]
+  Transfer --> Stellar
 ```
 
 Components:
